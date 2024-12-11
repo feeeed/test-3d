@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/Addons.js';
+import { DRACOLoader, GLTFLoader } from 'three/examples/jsm/Addons.js';
 import { Clock, time } from 'three/webgpu';
 
 
@@ -29,9 +29,26 @@ camera.rotateY(2.5)
 
 
 const loader = new GLTFLoader();
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderConfig({ type: 'js' });
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+loader.setDRACOLoader(dracoLoader);
 loader.load('/lab.glb', function (gltf){
-  mixer = new THREE.AnimationMixer(gltf.scene);
+  gltf.scene.children.forEach((child,index)=>{
+    console.log(child)
+    let mat = new THREE.MeshBasicMaterial({
+      color: 0x000ff1,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.1
+    });
+    child.material = mat
 
+  })
+  console.log(gltf);
+
+
+  mixer = new THREE.AnimationMixer(gltf.scene);
   gltf.animations.forEach((animation,index)=>{
     const action = mixer.clipAction(animation);
     action.play();
@@ -43,7 +60,7 @@ loader.load('/lab.glb', function (gltf){
 
   scene.add(gltf.scene);
 })
- 
+
 const clock = new THREE.Clock();
 function animate() {
 
