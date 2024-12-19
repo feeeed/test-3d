@@ -2,6 +2,8 @@ import * as THREE from "three";
 import { DRACOLoader, GLTFLoader } from "three/examples/jsm/Addons.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
+import { loadCurveJSON } from "./tools/CreateCurve";
+
 import fragment from "./wire.frag";
 import vertex from "./wire.vert";
 
@@ -11,6 +13,7 @@ import { addBarycentricCoordinates } from "./geom";
 
 // creating a tools constants
 let palette = palettes[13].slice();
+let pathFromCurve;
 
 // creating a environments THREE constants
 const scene = new THREE.Scene();
@@ -65,7 +68,7 @@ const material = new THREE.ShaderMaterial({
     dualStroke: { value: false },
     seeThrough: { value: true },
     insideAltColor: { value: true },
-    thickness: { value: 0.005 },
+    thickness: { value: 0.01 },
     secondThickness: { value: 0.05 },
     dashEnabled: { value: false },
     dashRepeats: { value: 0 },
@@ -91,8 +94,11 @@ loader.setDRACOLoader(dracoLoader);
 // SetUp loader
 loader.load("/lab.glb", function (gltf) {
   // new material on load scene
+  console.log(gltf);
+  console.log(gltf.cameras)
   gltf.scene.children.forEach((child, index) => {
     child.material = material;
+    
 
     if (child.geometry) {
       let geometry = child.geometry;
@@ -111,13 +117,38 @@ loader.load("/lab.glb", function (gltf) {
   scene.add(gltf.scene);
 });
 
+const boxGeo = new THREE.BoxGeometry(35,35,35);
+const boxMat = new THREE.MeshStandardMaterial({color: 0x00ff00});
+const box = new THREE.Mesh(boxGeo,boxMat);
+scene.add(box);
+
+
+const curvePoints = [];
+fetch('cameraPath.json').then((res)=> {
+  return res.json();
+}).then((data)=> {
+  data.points.forEach(element => {
+    curvePoints.push(new THREE.Vector3(element.x,element.y,element.z));
+  });
+  console.log(curvePoints)
+})
+const curve = new THREE.CatmullRomCurve3(curvePoints);
+console.log(curve)
+
+
 // MAIN FUNCTION
 
 function animate() {
   renderer.render(scene, camera);
   const deltaTime = clock.getDelta();
+  const elipsedTime = clock.getElapsedTime();
   controls.update();
-  material.uniforms.time.value = deltaTime;
+  let position = curve.getPointAt(deltaTime);
+  
+  
+  
+
+  material.uniforms.time.value = elipsedTime;
   if (mixer) {
     mixer.update(deltaTime);
   }
