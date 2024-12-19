@@ -1,19 +1,20 @@
 import * as THREE from "three";
 import { DRACOLoader, GLTFLoader } from "three/examples/jsm/Addons.js";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+// import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import { loadCurveJSON } from "./tools/CreateCurve";
 
 import fragment from "./wire.frag";
 import vertex from "./wire.vert";
 
-import palettes from "nice-color-palettes";
+
 
 import { addBarycentricCoordinates } from "./geom";
+import { handleScroll, updatePosition } from "./tools/PositionAlongPathMethods";
+import PositionAlongPathState from "./tools/PositionAlongPathState";
 
 // creating a tools constants
-let palette = palettes[13].slice();
-let pathFromCurve;
+
 
 // creating a environments THREE constants
 const scene = new THREE.Scene();
@@ -28,8 +29,29 @@ const camera = new THREE.PerspectiveCamera(
 const renderer = new THREE.WebGLRenderer({
   antialias: true,
 });
-const controls = new OrbitControls(camera, renderer.domElement);
+// const controls = new OrbitControls(camera, renderer.domElement);
 let mixer = null;
+
+let curvePath = await loadCurveJSON('cameraPath.json',scene);
+console.log(curvePath)
+
+camera.position.copy(curvePath.curve.getPointAt(0))
+camera.lookAt(curvePath.curve.getPointAt(0.99))
+
+scene.add(camera);
+let positionAlongPathState = new PositionAlongPathState();
+window.addEventListener('wheel', onMouseScroll, false);
+
+function onMouseScroll(event){
+  handleScroll(event, positionAlongPathState);
+}
+
+
+
+
+
+
+
 
 // adds constants at scene
 scene.add(light);
@@ -47,10 +69,11 @@ document.body.appendChild(renderer.domElement);
 
 // Setting up usage camera
 // Default preferences
-camera.position.z = -100;
-camera.position.y = 20;
-camera.position.x = -30;
-camera.rotateY(2.5);
+// camera.position.z = -100;
+// camera.position.y = 20;
+// camera.position.x = -30;
+// camera.rotateY(2.5);
+
 
 // Creating materials and shaders
 const material = new THREE.ShaderMaterial({
@@ -117,38 +140,38 @@ loader.load("/lab.glb", function (gltf) {
   scene.add(gltf.scene);
 });
 
-const boxGeo = new THREE.BoxGeometry(35,35,35);
-const boxMat = new THREE.MeshStandardMaterial({color: 0x00ff00});
-const box = new THREE.Mesh(boxGeo,boxMat);
-scene.add(box);
+// const boxGeo = new THREE.BoxGeometry(35,35,35);
+// const boxMat = new THREE.MeshStandardMaterial({color: 0x00ff00});
+// const box = new THREE.Mesh(boxGeo,boxMat);
+// scene.add(box);
 
 
-const curvePoints = [];
-fetch('cameraPath.json').then((res)=> {
-  return res.json();
-}).then((data)=> {
-  data.points.forEach(element => {
-    curvePoints.push(new THREE.Vector3(element.x,element.y,element.z));
-  });
-  console.log(curvePoints)
-})
-const curve = new THREE.CatmullRomCurve3(curvePoints);
-console.log(curve)
+// const curvePoints = [];
+// fetch('cameraPath.json').then((res)=> {
+//   return res.json();
+// }).then((data)=> {
+//   data.points.forEach(element => {
+//     curvePoints.push(new THREE.Vector3(element.x,element.y,element.z));
+//   });
+//   console.log(curvePoints)
+// })
+// curve = new THREE.CatmullRomCurve3(curvePoints);
+// curve.closed = false;
+
+// camera.position.copy(curve.getPointAt(0))
+
+// console.log(curve)
 
 
 // MAIN FUNCTION
 
-function animate() {
-  renderer.render(scene, camera);
+ async function animate() {
   const deltaTime = clock.getDelta();
   const elipsedTime = clock.getElapsedTime();
-  controls.update();
-  let position = curve.getPointAt(deltaTime);
-  
-  
-  
-
+  // controls.update();
   material.uniforms.time.value = elipsedTime;
+   await updatePosition(curvePath, camera, positionAlongPathState);
+  renderer.render(scene, camera);
   if (mixer) {
     mixer.update(deltaTime);
   }
