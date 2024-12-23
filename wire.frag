@@ -52,7 +52,7 @@ vec4 getStyledWireframe(vec3 barycentric) {
 
   // we can modify the distance field to create interesting effects & masking
   float noiseOff = 0.0;
-  if (noiseA) noiseOff += snoise(vec4(vPosition.xyz * 0.6, time * 0.5)) * 0.01;
+  if (noiseA) noiseOff += snoise(vec4(vPosition.xyz * 0.01, time * 0.35)) * 0.1;
   if (noiseB) noiseOff += snoise(vec4(vPosition.xyz * 80.0, time * 0.5)) * 0.12;
   d += noiseOff;
 
