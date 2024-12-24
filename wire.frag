@@ -30,6 +30,7 @@ uniform vec3 fill;
 
 #define PI (3.141592653589793)
 
+
 // This is like
 float aastep(float threshold, float dist) {
   float afwidth = fwidth(dist) * 0.5;
@@ -52,8 +53,8 @@ vec4 getStyledWireframe(vec3 barycentric) {
 
   // we can modify the distance field to create interesting effects & masking
   float noiseOff = 0.0;
-  if (noiseA) noiseOff += snoise(vec4(vPosition.xyz * 0.01, time * 0.35)) * 0.1;
-  if (noiseB) noiseOff += snoise(vec4(vPosition.xyz * 80.0, time * 0.5)) * 0.12;
+  if (noiseA) noiseOff += snoise(vec4(vPosition.xyz * 0.4, time * 0.3)) * 0.22;
+  // if (noiseB) noiseOff += snoise(vec4(vPosition.xyz * 80.0, time * 0.5)) * 0.12;
   d += noiseOff;
 
   // for dashed rendering, we can use this to get the 0 .. 1 value of the line length
