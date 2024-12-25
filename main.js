@@ -261,6 +261,23 @@ function createOutline(scene, objectsArray) {
   const gui = new GUI();
 
   const bloomFolder = gui.addFolder("bloom");
+  const lightningFolder = gui.addFolder("Параметры молнии");
+
+  lightningFolder.add(rayParams,"roughness",0.0,1.0).onChange(function (value){
+    rayParams.roughness = Number(value);
+  })
+  lightningFolder.add(rayParams,"straightness",0.0,1.0).onChange(function (value){
+    rayParams.straightness = Number(value);
+  })
+  lightningFolder.add(rayParams,"radius0",0.0,1.0).onChange(function (value){
+    rayParams.radius0 = Number(value);
+  })
+  lightningFolder.add(rayParams,"radius1",0.0,1.0).onChange(function (value){
+    rayParams.radius1 = Number(value);
+  })
+  lightningFolder.add(rayParams,"timeScale",0.0,1.0).onChange(function (value){
+    rayParams.timeScale = Number(value);
+  })
 
   bloomFolder.add(params, "threshold", 0.0, 1.0).onChange(function (value) {
     bloomPass.threshold = Number(value);
@@ -270,12 +287,16 @@ function createOutline(scene, objectsArray) {
     bloomPass.strength = Number(value);
   });
 
+
+
   gui
     .add(params, "radius", 0.0, 1.0)
     .step(0.01)
     .onChange(function (value) {
       bloomPass.radius = Number(value);
     });
+    
+    
 
   const toneMappingFolder = gui.addFolder("tone mapping");
 
