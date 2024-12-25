@@ -58,7 +58,7 @@ const rayParams = {
     recursionProbability: 0.6,
   
     roughness: 0.85,
-    straightness: 0.68,
+    straightness: 0.9,
   };
   const material = new THREE.ShaderMaterial({
     extensions: {
@@ -214,6 +214,15 @@ function createOutline(scene, objectsArray) {
     }
   }
 
+  function renderBolt(bolt,lastcube){
+    lightningStrikes[bolt].rayParameters.sourceOffset.copy(cubes[lastcube].position);
+    lightningStrikes[bolt].rayParameters.destOffset.copy(cubes[0].position);
+  }
+  function renderBolt2(bolt,lastcube){
+    lightningStrikes2[bolt].rayParameters.sourceOffset.copy(cubes2[lastcube].position);
+    lightningStrikes2[bolt].rayParameters.destOffset.copy(cubes2[0].position);
+  }
+
   //
 
   const renderScene = new RenderPass(scene, camera);
@@ -235,16 +244,12 @@ function createOutline(scene, objectsArray) {
   composer.addPass(bloomPass);
   composer.addPass(outputPass);
 
-  recreateRay(rayParams,15,lightningStrikes,outlineMeshArray);
-  recreateRay(rayParams,15,lightningStrikes2,outlineMeshArray2);
+  recreateRay(rayParams,16,lightningStrikes,outlineMeshArray);
+  recreateRay(rayParams,17,lightningStrikes2,outlineMeshArray2);
 
   createOutline(scene, outlineMeshArray, new THREE.Color(0x0000ff));
-  
+  createOutline(scene, outlineMeshArray2, new THREE.Color(0x0000ff));
 
-
-  //
-
-  //
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.maxPolarAngle = Math.PI * 0.5;
@@ -304,22 +309,23 @@ function animate() {
   material.uniforms.time.value = elipsedTime;
   material2.uniforms.time.value = elipsedTime;
 
-  for(let i=0; i < lightningStrikes.length; i++){
+  for(let i=0; i < 15; i++){
     lightningStrikes[i].rayParameters.sourceOffset.copy(cubes[i].position);
     lightningStrikes[i].rayParameters.destOffset.copy(cubes[i+1].position);
-    if(lightningStrikes[i]==lightningStrikes.length){
-        console.log('asd')
-    }
     lightningStrikes[i].update(t)
   }
-  for(let i=0; i < lightningStrikes2.length; i++){
+  for(let i=0; i < 16; i++){
     lightningStrikes2[i].rayParameters.sourceOffset.copy(cubes2[i].position);
     lightningStrikes2[i].rayParameters.destOffset.copy(cubes2[i+1].position);
-    if(lightningStrikes2[i]==lightningStrikes2.length){
-        console.log('asd')
-    }
     lightningStrikes2[i].update(t)
   }
+    renderBolt(15,15);
+    lightningStrikes[15].update(t)
+    renderBolt2(16,16);
+    lightningStrikes2[16].update(t)
+
+    
+  
 
     // lightningStrikes[0].rayParameters.sourceOffset.copy(cubes[0].position);
     // lightningStrikes[0].rayParameters.destOffset.copy(cubes[1].position);
